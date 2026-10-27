@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 st.title("XOR Neural Network Visualizer")
-st.write("A simple application to understand how a neural network solves XOR.")
+st.write("Understand how a neural network learns the XOR problem.")
 
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 Y = np.array([0, 1, 1, 0])
@@ -11,28 +11,33 @@ Y = np.array([0, 1, 1, 0])
 def sigmoid(x):
     return 1 / (1 + np.exp(-np.clip(x, -500, 500)))
 
-np.random.seed(42)
+# Initialize weights and biases
+W1 = np.array([[5.0, -5.0],
+               [5.0, -5.0]])
+b1 = np.array([[-2.5, 7.5]])
 
-W1 = np.random.randn(2, 2)
-b1 = np.zeros((1, 2))
-W2 = np.random.randn(2, 1)
-b2 = np.zeros((1, 1))
+W2 = np.array([[5.0], [5.0]])
+b2 = np.array([[-7.5]])
 
 lr = 0.5
 
+# Train the neural network
 for epoch in range(10000):
     hidden = sigmoid(np.dot(X, W1) + b1)
     output = sigmoid(np.dot(hidden, W2) + b2)
 
     error = output - Y.reshape(-1, 1)
+
     d_output = error * output * (1 - output)
     d_hidden = np.dot(d_output, W2.T) * hidden * (1 - hidden)
 
     W2 -= lr * np.dot(hidden.T, d_output) / 4
     b2 -= lr * np.mean(d_output, axis=0, keepdims=True)
+
     W1 -= lr * np.dot(X.T, d_hidden) / 4
     b1 -= lr * np.mean(d_hidden, axis=0, keepdims=True)
 
+# Test predictions
 hidden = sigmoid(np.dot(X, W1) + b1)
 output = sigmoid(np.dot(hidden, W2) + b2)
 predictions = (output >= 0.5).astype(int).flatten()
@@ -49,6 +54,7 @@ for i in range(4):
 correct = np.sum(predictions == Y)
 st.metric("Correct Predictions", f"{correct}/4")
 
+# Plot decision boundary
 st.subheader("Decision Boundary")
 
 xx, yy = np.meshgrid(
